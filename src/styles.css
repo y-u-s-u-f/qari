@@ -1190,23 +1190,6 @@ button {
   background: color-mix(in srgb, var(--gr) 25%, var(--bg-2));
   border-color: color-mix(in srgb, var(--gr) 50%, var(--ui-2));
 }
-.takrar-x {
-  opacity: 0;
-  transition: opacity 0.15s;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--tx-3);
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-}
-.takrar-pill:hover .takrar-x {
-  opacity: 1;
-}
-.takrar-x:hover {
-  color: var(--tx);
-}
 /* ——— Inline marks navigator — left edge, mirrors the page pip ——— */
 .marks-nav {
   position: fixed;

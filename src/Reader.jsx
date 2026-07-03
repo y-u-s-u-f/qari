@@ -205,11 +205,11 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     }
   }
 
-  // Hold-and-drag the pip to scrub pages — left is forward (RTL), fine near
-  // the start then accelerating so 1–604 fits in roughly half a screen.
+  // Hold-and-drag the pip vertically to scrub pages — down is forward (like
+  // scrolling), fine near the start then accelerating so 1–604 fits on screen.
   const pipPointerDown = (e) => {
     if (pipEditRef.current) return
-    pipDragRef.current = { x: e.clientX, page: pip, scrub: false, to: pip }
+    pipDragRef.current = { y: e.clientY, page: pip, scrub: false, to: pip }
     try {
       e.currentTarget.setPointerCapture(e.pointerId)
     } catch {}
@@ -218,11 +218,11 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const pipPointerMove = (e) => {
     const d = pipDragRef.current
     if (!d) return
-    const dx = e.clientX - d.x
-    if (!d.scrub && Math.abs(dx) <= 4) return
+    const dy = e.clientY - d.y
+    if (!d.scrub && Math.abs(dy) <= 4) return
     d.scrub = true
-    const steps = Math.abs(dx) / 12
-    const delta = Math.sign(dx) * Math.floor(steps + (steps > 12 ? (steps - 12) ** 1.7 : 0))
+    const steps = Math.abs(dy) / 12
+    const delta = Math.sign(dy) * Math.floor(steps + (steps > 12 ? (steps - 12) ** 1.7 : 0))
     d.to = Math.max(1, Math.min(604, d.page + delta))
     setPipScrub(d.to)
   }
@@ -498,20 +498,26 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     }
   }, [])
 
-  // Takrar repetition counter — 't' starts it, then each press counts one repetition
+  // Takrar repetition counter — 't' toggles it, 'h' counts up, 'l' counts down
   useEffect(() => {
     const isTyping = (e) =>
       e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable
     const onDown = (e) => {
-      if (e.key !== 't' || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((e.key !== 't' && e.key !== 'h' && e.key !== 'l') || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.defaultPrevented || isTyping(e)) return
-      setTakrar((t) => (t ? { ...t, count: t.count + 1 } : { count: 0, target: load('takrarTarget', 11) }))
+      if (e.key === 't') {
+        setTakrar((t) => (t ? null : { count: 0, target: load('takrarTarget', 11) }))
+      } else if (e.key === 'h') {
+        setTakrar((t) => (t ? { ...t, count: t.count + 1 } : t))
+      } else {
+        setTakrar((t) => (t ? { ...t, count: Math.max(0, t.count - 1) } : t))
+      }
     }
     window.addEventListener('keydown', onDown)
     return () => window.removeEventListener('keydown', onDown)
   }, [])
 
-  // Takrar auto-clear ~1.5s after the target is reached (also cleans up on ✕/unmount)
+  // Takrar auto-clear ~1.5s after the target is reached (also cleans up on t/unmount)
   useEffect(() => {
     clearTimeout(takrarTimer.current)
     if (takrar && takrar.count >= takrar.target)
@@ -1648,7 +1654,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       {takrar && (
         <div
           className={'takrar-pill' + (takrar.count >= takrar.target ? ' done' : '')}
-          title="takrār — press t or click to count"
+          title="takrār — h counts up, l down, t closes (click also counts)"
           style={
             takrar.count >= takrar.target
               ? undefined
@@ -1657,17 +1663,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
           onClick={() => setTakrar((t) => (t ? { ...t, count: t.count + 1 } : t))}
         >
           {takrar.count}
-          <button
-            className="takrar-x"
-            title="dismiss"
-            onClick={(e) => {
-              e.stopPropagation()
-              clearTimeout(takrarTimer.current)
-              setTakrar(null)
-            }}
-          >
-            ✕
-          </button>
         </div>
       )}
 
