@@ -21,7 +21,17 @@ const PAGE_STARTS = new Map(navData.pages.map((e) => [`${e.surah}:${e.ayah}`, e.
 // surah numbers wrap around: 114 follows 1 going up, 1 follows 114 going down
 const wrapSurah = (n) => ((n - 1 + 114) % 114) + 1
 
-export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
+const PALETTES = [
+  ['flexoki', 'Flexoki'],
+  ['ayu', 'Ayu'],
+  ['catppuccin', 'Catppuccin'],
+  ['everforest', 'Everforest'],
+  ['gruvbox', 'Gruvbox'],
+  ['nord', 'Nord'],
+  ['rose-pine', 'Rosé Pine'],
+]
+
+export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, palette, setPalette }) {
   const [surahs, setSurahs] = useState([])
   const [highlights, setHighlights] = useState(() => load('highlights', {}))
   const [cards, setCards] = useState(() => load('cards', []))
@@ -1269,6 +1279,19 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
               <button className={theme === 'dark' ? 'on' : ''} onClick={() => setTheme('dark')}>
                 ☾ Dark
               </button>
+            </div>
+            <div className="prefs-palettes">
+              {PALETTES.map(([id, label]) => (
+                <button
+                  key={id}
+                  className={palette === id ? 'on' : ''}
+                  aria-pressed={palette === id}
+                  onClick={() => setPalette(id)}
+                >
+                  <span>{label}</span>
+                  {palette === id && <span className="prefs-check">✓</span>}
+                </button>
+              ))}
             </div>
           </div>
         )}

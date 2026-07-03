@@ -26,12 +26,19 @@ const urlFor = (view) =>
 
 export default function App() {
   const [theme, setTheme] = useState(() => load('theme', 'light'))
+  const [palette, setPalette] = useState(() => load('palette', 'flexoki'))
   const [view, setView] = useState(parseLocation)
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     save('theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    if (palette === 'flexoki') delete document.documentElement.dataset.palette
+    else document.documentElement.dataset.palette = palette
+    save('palette', palette)
+  }, [palette])
 
   useEffect(() => {
     // normalize the address bar on first load ('/' → '/home', bare /mushaf → resumed ayah)
@@ -54,7 +61,16 @@ export default function App() {
     <>
       {view.name === 'home' && <Home openReader={openReader} openCards={openCards} theme={theme} setTheme={setTheme} />}
       {view.name === 'read' && (
-        <Reader surah={view.surah} ayah={view.ayah} nav={view} goHome={goHome} theme={theme} setTheme={setTheme} />
+        <Reader
+          surah={view.surah}
+          ayah={view.ayah}
+          nav={view}
+          goHome={goHome}
+          theme={theme}
+          setTheme={setTheme}
+          palette={palette}
+          setPalette={setPalette}
+        />
       )}
       {view.name === 'cards' && <Flashcards goHome={goHome} openReader={openReader} />}
       <CommandBar openReader={openReader} openCards={openCards} />

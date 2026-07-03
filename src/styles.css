@@ -33,6 +33,216 @@
   --pu: #8b7ec8;
 }
 
+/* ——— Ayu (ayu-theme/ayu-colors, Light/Dark, npm ayu v9) ——— */
+[data-palette='ayu'] {
+  --bg: #fcfcfc;
+  --bg-2: #f8f9fa;
+  --ui: #ebeef0;
+  --ui-2: #d6d9db;
+  --ui-3: #c2c3c6;
+  --tx: #5c6166;
+  --tx-2: #828e9f;
+  --tx-3: #adaeb1;
+  --re: #f07171;
+  --or: #ff7e33;
+  --ye: #f2a300;
+  --gr: #86b300;
+  --bl: #399ee6;
+  --pu: #a37acc;
+}
+
+[data-palette='ayu'][data-theme='dark'] {
+  --bg: #0d1017;
+  --bg-2: #141821;
+  --ui: #1b1f29;
+  --ui-2: #313947;
+  --ui-3: #475266;
+  --tx: #bfbdb6;
+  --tx-2: #6c7380;
+  --tx-3: #555e73;
+  --re: #f07178;
+  --or: #ff8f40;
+  --ye: #ffb454;
+  --gr: #aad94c;
+  --bl: #59c2ff;
+  --pu: #d2a6ff;
+}
+
+/* ——— Catppuccin (catppuccin/palette, Latte/Mocha; or=peach, pu=mauve) ——— */
+[data-palette='catppuccin'] {
+  --bg: #eff1f5;
+  --bg-2: #e6e9ef;
+  --ui: #dce0e8;
+  --ui-2: #ccd0da;
+  --ui-3: #bcc0cc;
+  --tx: #4c4f69;
+  --tx-2: #6c6f85;
+  --tx-3: #9ca0b0;
+  --re: #d20f39;
+  --or: #fe640b;
+  --ye: #df8e1d;
+  --gr: #40a02b;
+  --bl: #1e66f5;
+  --pu: #8839ef;
+}
+
+[data-palette='catppuccin'][data-theme='dark'] {
+  --bg: #1e1e2e;
+  --bg-2: #313244;
+  --ui: #45475a;
+  --ui-2: #585b70;
+  --ui-3: #6c7086;
+  --tx: #cdd6f4;
+  --tx-2: #a6adc8;
+  --tx-3: #7f849c;
+  --re: #f38ba8;
+  --or: #fab387;
+  --ye: #f9e2af;
+  --gr: #a6e3a1;
+  --bl: #89b4fa;
+  --pu: #cba6f7;
+}
+
+/* ——— Everforest (sainnhe/everforest, Light/Dark Medium) ——— */
+[data-palette='everforest'] {
+  --bg: #fdf6e3;
+  --bg-2: #f4f0d9;
+  --ui: #efebd4;
+  --ui-2: #e6e2cc;
+  --ui-3: #e0dcc7;
+  --tx: #5c6a72;
+  --tx-2: #939f91;
+  --tx-3: #a6b0a0;
+  --re: #f85552;
+  --or: #f57d26;
+  --ye: #dfa000;
+  --gr: #8da101;
+  --bl: #3a94c5;
+  --pu: #df69ba;
+}
+
+[data-palette='everforest'][data-theme='dark'] {
+  --bg: #2d353b;
+  --bg-2: #343f44;
+  --ui: #3d484d;
+  --ui-2: #475258;
+  --ui-3: #4f585e;
+  --tx: #d3c6aa;
+  --tx-2: #859289;
+  --tx-3: #7a8478;
+  --re: #e67e80;
+  --or: #e69875;
+  --ye: #dbbc7f;
+  --gr: #a7c080;
+  --bl: #7fbbb3;
+  --pu: #d699b6;
+}
+
+/* ——— Gruvbox (morhetz/gruvbox, medium; faded accents light, bright dark) ——— */
+[data-palette='gruvbox'] {
+  --bg: #fbf1c7;
+  --bg-2: #f2e5bc;
+  --ui: #ebdbb2;
+  --ui-2: #d5c4a1;
+  --ui-3: #bdae93;
+  --tx: #3c3836;
+  --tx-2: #665c54;
+  --tx-3: #928374;
+  --re: #9d0006;
+  --or: #af3a03;
+  --ye: #b57614;
+  --gr: #79740e;
+  --bl: #076678;
+  --pu: #8f3f71;
+}
+
+[data-palette='gruvbox'][data-theme='dark'] {
+  --bg: #282828;
+  --bg-2: #32302f;
+  --ui: #3c3836;
+  --ui-2: #504945;
+  --ui-3: #665c54;
+  --tx: #ebdbb2;
+  --tx-2: #a89984;
+  --tx-3: #7c6f64;
+  --re: #fb4934;
+  --or: #fe8019;
+  --ye: #fabd2f;
+  --gr: #b8bb26;
+  --bl: #83a598;
+  --pu: #d3869b;
+}
+
+/* ——— Nord (nordtheme.com, dark/bright ambiances; pu=nord15) ——— */
+[data-palette='nord'] {
+  --bg: #eceff4;
+  --bg-2: #e5e9f0;
+  --ui: #d8dee9;
+  --ui-2: #cad0dc;
+  --ui-3: #bcc3d0;
+  --tx: #2e3440;
+  --tx-2: #4c566a;
+  --tx-3: #a0a8b6;
+  --re: #bf616a;
+  --or: #d08770;
+  --ye: #ebcb8b;
+  --gr: #a3be8c;
+  --bl: #5e81ac;
+  --pu: #b48ead;
+}
+
+[data-palette='nord'][data-theme='dark'] {
+  --bg: #2e3440;
+  --bg-2: #3b4252;
+  --ui: #434c5e;
+  --ui-2: #4c566a;
+  --ui-3: #5a6477;
+  --tx: #eceff4;
+  --tx-2: #929aaa;
+  --tx-3: #687183;
+  --re: #bf616a;
+  --or: #d08770;
+  --ye: #ebcb8b;
+  --gr: #a3be8c;
+  --bl: #81a1c1;
+  --pu: #b48ead;
+}
+
+/* ——— Rosé Pine (rosepinetheme.com, Dawn/Main; re=love, or=rose/gold, gr=pine, bl=foam, pu=iris) ——— */
+[data-palette='rose-pine'] {
+  --bg: #faf4ed;
+  --bg-2: #f4ede8;
+  --ui: #f2e9e1;
+  --ui-2: #dfdad9;
+  --ui-3: #cecacd;
+  --tx: #464261;
+  --tx-2: #797593;
+  --tx-3: #9893a5;
+  --re: #b4637a;
+  --or: #d7827e;
+  --ye: #ea9d34;
+  --gr: #286983;
+  --bl: #56949f;
+  --pu: #907aa9;
+}
+
+[data-palette='rose-pine'][data-theme='dark'] {
+  --bg: #191724;
+  --bg-2: #1f1d2e;
+  --ui: #26233a;
+  --ui-2: #403d52;
+  --ui-3: #524f67;
+  --tx: #e0def4;
+  --tx-2: #908caa;
+  --tx-3: #6e6a86;
+  --re: #eb6f92;
+  --or: #ea9d34;
+  --ye: #f6c177;
+  --gr: #31748f;
+  --bl: #9ccfd8;
+  --pu: #c4a7e7;
+}
+
 /* KFGQPC HAFS Uthmanic Script v22, bundled */
 @font-face {
   font-family: 'KFGQPC Local';
@@ -415,6 +625,38 @@ button {
   font-size: 12px;
   color: var(--tx-3);
   background: var(--bg-2);
+}
+.prefs-palettes {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ui-2);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.prefs-palettes > * + * {
+  border-top: 1px solid var(--ui-2);
+}
+.prefs-palettes button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--tx-2);
+  background: var(--bg-2);
+}
+.prefs-palettes button:hover {
+  color: var(--tx);
+}
+.prefs-palettes button.on {
+  background: var(--ui);
+  color: var(--tx);
+}
+.prefs-check {
+  color: var(--tx-3);
 }
 .reader {
   max-width: 760px;
