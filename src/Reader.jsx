@@ -52,7 +52,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const [fontSize, setFontSize] = useState(() => load('fontSize', 32)) // mushaf text size, px
   const [prefs, setPrefs] = useState(false) // Aa display-settings popover
   const [takrar, setTakrar] = useState(null) // { count, target } — repetition counter, ephemeral
-  const [veil, setVeil] = useState(null) // { mode: 'full'|'chain', surah, ayah, word } — free-recite frontier, ephemeral
+  const [veil, setVeil] = useState(null) // { surah, ayah, word } — free-recite frontier, ephemeral
   const takrarTimer = useRef(null)
   const prefsRef = useRef(null)
   const flashTimer = useRef(null)
@@ -689,11 +689,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       suppressClickRef.current = false
       const v = veilRef.current
       const [ws, wa, wi] = key.split(':').map(Number)
-      if (v.mode === 'full') {
-        if (afterFrontier(ws, wa, wi, v)) veilTo(ws, wa, wi + 1)
-      } else if ((ws > v.surah || (ws === v.surah && wa > v.ayah)) && wi >= 1) {
-        veilTo(ws, wa, 0) // reveal that whole ayah and everything before it
-      }
+      if (afterFrontier(ws, wa, wi, v)) veilTo(ws, wa, wi + 1)
       return
     }
     if (testRef.current) {
@@ -1069,8 +1065,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const testItem = test ? test.queue[test.idx] : null
 
   // ——— Veil practice: cover the page and recite from memory, no marks needed ———
-  // full mode veils everything from the frontier on; chain mode shows only each
-  // ayah's first word past the frontier ayah (markers stay visible as the cue chain)
+  // everything from the frontier {surah, ayah, word} on is veiled
 
   // move the frontier, rolling word overflow into the next ayah; the session
   // ends at the surah's edge — the veil never crosses into the next surah
@@ -1097,30 +1092,51 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     if (v) veilTo(v.surah, v.ayah, v.word + 1)
   }
 
-  const veilVerse = () => {
+  // reveal through the end of the frontier word's rendered line (same 40px
+  // top-grouping as computeLines); falls back to end-of-verse when unmeasurable
+  const veilLine = () => {
     const v = veilRef.current
-    if (v) veilTo(v.surah, v.ayah + 1, 0)
+    if (!v) return
+    const root = containerRef.current
+    const first = root?.querySelector(`[data-key="${v.surah}:${v.ayah}:${v.word}"]`)
+    const sObj = surahsRef.current.find((x) => x.number === v.surah)
+    if (!first || !sObj) {
+      veilTo(v.surah, v.ayah + 1, 0)
+      return
+    }
+    const top = first.getBoundingClientRect().top
+    let a = v.ayah
+    let w = v.word
+    for (;;) {
+      let na = a
+      let nw = w + 1
+      if (nw >= (sObj.ayahs[na - 1]?.words.length ?? 0)) {
+        na += 1
+        nw = 0
+      }
+      if (na > sObj.ayahs.length) break
+      const el = root.querySelector(`[data-key="${v.surah}:${na}:${nw}"]`)
+      if (!el || Math.abs(el.getBoundingClientRect().top - top) >= 40) break
+      a = na
+      w = nw
+    }
+    veilTo(v.surah, a, w + 1)
   }
 
   const startVeil = () => {
     if (testRef.current || cardSelRef.current) return
     const { surah: s, ayah: a } = readingPos()
-    setVeil({ mode: 'full', surah: s, ayah: a, word: 0 })
+    setVeil({ surah: s, ayah: a, word: 0 })
   }
 
-  const toggleVeilMode = () => {
-    const v = veilRef.current
-    if (v) setVeil({ mode: v.mode === 'full' ? 'chain' : 'full', surah: v.surah, ayah: v.ayah, word: 0 })
-  }
-
-  // 'v' starts a session at the current ayah, or toggles full ↔ chain mid-session
+  // 'v' starts a session at the current ayah, or ends the active one
   useEffect(() => {
     const isTyping = (e) =>
       e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable
     const onDown = (e) => {
       if (e.key !== 'v' || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.defaultPrevented || isTyping(e)) return
-      if (veilRef.current) toggleVeilMode()
+      if (veilRef.current) setVeil(null)
       else startVeil()
     }
     window.addEventListener('keydown', onDown)
@@ -1135,13 +1151,12 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       if (e.key === 'Escape') {
         e.preventDefault()
         setVeil(null)
-      } else if (e.key === ' ') {
-        e.preventDefault() // Space reveals — don't scroll the page
-        if (veil.mode === 'full') veilWord()
-        else veilVerse()
-      } else if (e.key === 'Enter') {
+      } else if (e.key === 'w' && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault()
-        veilVerse()
+        veilWord()
+      } else if (e.key === '$') {
+        e.preventDefault()
+        veilLine()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -1487,12 +1502,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                         (a.n === testItem.startAyah || a.n === testItem.ayah) &&
                         (a.n === testItem.ayah && testItem.startAyah !== testItem.ayah ? testItem.startLen + i : i) >=
                           test.reveal
-                      const freeVeiled =
-                        veil &&
-                        !testItem &&
-                        (veil.mode === 'full'
-                          ? afterFrontier(s.number, a.n, i, veil)
-                          : (s.number > veil.surah || (s.number === veil.surah && a.n > veil.ayah)) && i >= 1)
+                      const freeVeiled = veil && !testItem && afterFrontier(s.number, a.n, i, veil)
                       return (
                         <span
                           key={i}
@@ -1623,16 +1633,11 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
           <span className="test-progress">
             reciting from {veil.surah}:{veil.ayah}
           </span>
-          {veil.mode === 'full' && (
-            <button className="ghost" title="reveal one word (Space, or tap a veiled word)" onClick={veilWord}>
-              word
-            </button>
-          )}
-          <button className="ghost" title="reveal to the end of the verse (Enter)" onClick={veilVerse}>
-            verse
+          <button className="ghost" title="reveal one word (w, or tap a veiled word)" onClick={veilWord}>
+            word
           </button>
-          <button className="ghost" title="first-word chain — only each ayah's first word shows (v)" onClick={toggleVeilMode}>
-            {veil.mode === 'full' ? 'chain' : 'full'}
+          <button className="ghost" title="reveal to the end of the line ($)" onClick={veilLine}>
+            line
           </button>
           <button className="ghost" title="end (Esc)" onClick={() => setVeil(null)}>
             ✕
@@ -1651,31 +1656,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
           }
           onClick={() => setTakrar((t) => (t ? { ...t, count: t.count + 1 } : t))}
         >
-          <button
-            className="takrar-adj"
-            title="lower target"
-            onClick={(e) => {
-              e.stopPropagation()
-              const target = Math.max(3, takrar.target - 1)
-              save('takrarTarget', target)
-              setTakrar({ ...takrar, target })
-            }}
-          >
-            −
-          </button>
-          {takrar.count} / {takrar.target}
-          <button
-            className="takrar-adj"
-            title="raise target"
-            onClick={(e) => {
-              e.stopPropagation()
-              const target = Math.min(99, takrar.target + 1)
-              save('takrarTarget', target)
-              setTakrar({ ...takrar, target })
-            }}
-          >
-            +
-          </button>
+          {takrar.count}
           <button
             className="takrar-x"
             title="dismiss"

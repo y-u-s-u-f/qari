@@ -1190,8 +1190,7 @@ button {
   background: color-mix(in srgb, var(--gr) 25%, var(--bg-2));
   border-color: color-mix(in srgb, var(--gr) 50%, var(--ui-2));
 }
-.takrar-x,
-.takrar-adj {
+.takrar-x {
   opacity: 0;
   transition: opacity 0.15s;
   background: none;
@@ -1202,12 +1201,10 @@ button {
   line-height: 1;
   cursor: pointer;
 }
-.takrar-pill:hover .takrar-x,
-.takrar-pill:hover .takrar-adj {
+.takrar-pill:hover .takrar-x {
   opacity: 1;
 }
-.takrar-x:hover,
-.takrar-adj:hover {
+.takrar-x:hover {
   color: var(--tx);
 }
 /* ——— Inline marks navigator — left edge, mirrors the page pip ——— */
