@@ -498,7 +498,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     }
   }, [])
 
-  // Takrar repetition counter — 't' toggles it, 'h' counts up, 'l' counts down
+  // Takrar repetition counter — 't' toggles it, 'l' counts up, 'h' counts down
   useEffect(() => {
     const isTyping = (e) =>
       e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable
@@ -507,7 +507,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       if (e.defaultPrevented || isTyping(e)) return
       if (e.key === 't') {
         setTakrar((t) => (t ? null : { count: 0, target: load('takrarTarget', 11) }))
-      } else if (e.key === 'h') {
+      } else if (e.key === 'l') {
         setTakrar((t) => (t ? { ...t, count: t.count + 1 } : t))
       } else {
         setTakrar((t) => (t ? { ...t, count: Math.max(0, t.count - 1) } : t))
@@ -1654,7 +1654,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       {takrar && (
         <div
           className={'takrar-pill' + (takrar.count >= takrar.target ? ' done' : '')}
-          title="takrār — h counts up, l down, t closes (click also counts)"
+          title="takrār — l counts up, h down, t closes (click also counts)"
           style={
             takrar.count >= takrar.target
               ? undefined
