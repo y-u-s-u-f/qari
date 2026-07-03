@@ -51,6 +51,8 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const [flash, setFlash] = useState(null) // 'S:A' tinted for a moment after a jump, to locate it
   const [fontSize, setFontSize] = useState(() => load('fontSize', 32)) // mushaf text size, px
   const [prefs, setPrefs] = useState(false) // Aa display-settings popover
+  const [takrar, setTakrar] = useState(null) // { count, target } — repetition counter, ephemeral
+  const takrarTimer = useRef(null)
   const prefsRef = useRef(null)
   const flashTimer = useRef(null)
   const pipEditRef = useRef(false)
@@ -493,6 +495,27 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       if (raf) cancelAnimationFrame(raf)
     }
   }, [])
+
+  // Takrar repetition counter — 't' starts it, then each press counts one repetition
+  useEffect(() => {
+    const isTyping = (e) =>
+      e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable
+    const onDown = (e) => {
+      if (e.key !== 't' || e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.defaultPrevented || isTyping(e)) return
+      setTakrar((t) => (t ? { ...t, count: t.count + 1 } : { count: 0, target: load('takrarTarget', 11) }))
+    }
+    window.addEventListener('keydown', onDown)
+    return () => window.removeEventListener('keydown', onDown)
+  }, [])
+
+  // Takrar auto-clear ~1.5s after the target is reached (also cleans up on ✕/unmount)
+  useEffect(() => {
+    clearTimeout(takrarTimer.current)
+    if (takrar && takrar.count >= takrar.target)
+      takrarTimer.current = setTimeout(() => setTakrar(null), 1500)
+    return () => clearTimeout(takrarTimer.current)
+  }, [takrar])
 
   // Scroll / resize handling
   useEffect(() => {
@@ -1462,6 +1485,56 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
             next ›
           </button>
           <button className="ghost" title="end test (Esc)" onClick={() => setTest(null)}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {takrar && (
+        <div
+          className={'takrar-pill' + (takrar.count >= takrar.target ? ' done' : '')}
+          title="takrār — press t or click to count"
+          style={
+            takrar.count >= takrar.target
+              ? undefined
+              : { background: `color-mix(in srgb, var(--gr) ${Math.round((takrar.count / takrar.target) * 20)}%, var(--bg-2))` }
+          }
+          onClick={() => setTakrar((t) => (t ? { ...t, count: t.count + 1 } : t))}
+        >
+          <button
+            className="takrar-adj"
+            title="lower target"
+            onClick={(e) => {
+              e.stopPropagation()
+              const target = Math.max(3, takrar.target - 1)
+              save('takrarTarget', target)
+              setTakrar({ ...takrar, target })
+            }}
+          >
+            −
+          </button>
+          {takrar.count} / {takrar.target}
+          <button
+            className="takrar-adj"
+            title="raise target"
+            onClick={(e) => {
+              e.stopPropagation()
+              const target = Math.min(99, takrar.target + 1)
+              save('takrarTarget', target)
+              setTakrar({ ...takrar, target })
+            }}
+          >
+            +
+          </button>
+          <button
+            className="takrar-x"
+            title="dismiss"
+            onClick={(e) => {
+              e.stopPropagation()
+              clearTimeout(takrarTimer.current)
+              setTakrar(null)
+            }}
+          >
             ✕
           </button>
         </div>
