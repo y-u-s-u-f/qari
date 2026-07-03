@@ -52,6 +52,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const [fontSize, setFontSize] = useState(() => load('fontSize', 32)) // mushaf text size, px
   const [prefs, setPrefs] = useState(false) // Aa display-settings popover
   const [takrar, setTakrar] = useState(null) // { count, target } — repetition counter, ephemeral
+  const [veil, setVeil] = useState(null) // { mode: 'full'|'chain', surah, ayah, word } — free-recite frontier, ephemeral
   const takrarTimer = useRef(null)
   const prefsRef = useRef(null)
   const flashTimer = useRef(null)
@@ -60,6 +61,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const pipSuppressRef = useRef(false)
   const cardSelRef = useRef(null)
   const testRef = useRef(null)
+  const veilRef = useRef(null)
   const cueMenuRef = useRef(null)
   const mutPopRef = useRef(null)
   const menuRef = useRef(null)
@@ -682,6 +684,18 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   }
 
   const markWord = (key) => {
+    if (veilRef.current) {
+      // free recite: tapping a veiled word moves the frontier just past it; revealed words are inert
+      suppressClickRef.current = false
+      const v = veilRef.current
+      const [ws, wa, wi] = key.split(':').map(Number)
+      if (v.mode === 'full') {
+        if (afterFrontier(ws, wa, wi, v)) veilTo(ws, wa, wi + 1)
+      } else if ((ws > v.surah || (ws === v.surah && wa > v.ayah)) && wi >= 1) {
+        veilTo(ws, wa, 0) // reveal that whole ayah and everything before it
+      }
+      return
+    }
     if (testRef.current) {
       // testing: clicking a veiled word reveals one more; revealed words are inert
       suppressClickRef.current = false
@@ -766,7 +780,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   }
 
   const markerClick = (s, a) => {
-    if (testRef.current) return
+    if (testRef.current || veilRef.current) return
     setPending(null)
     setMenu(null)
     if (cardSelRef.current) {
@@ -786,6 +800,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
 
   cardSelRef.current = cardSel
   testRef.current = test
+  veilRef.current = veil
 
   // cancel card-picking on Escape or a pointerdown outside the target ayah
   useEffect(() => {
@@ -867,6 +882,10 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     }
     return targetRef.current
   }
+
+  // is s:a:i at or past the free-recite veil frontier (i.e. still covered)?
+  const afterFrontier = (s, a, i, v) =>
+    s > v.surah || (s === v.surah && (a > v.ayah || (a === v.ayah && i >= v.word)))
 
   const markStep = (dir) => {
     if (!markedList.length) return null
@@ -979,6 +998,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   // window = the ayah before the mark (run-up) + the marked ayah, words flattened;
   // reveal counts how many of those words are shown, the rest are blurred
   const startTest = async () => {
+    if (veilRef.current) return
     const list = filteredMarks
     if (!list.length) return
     const texts = new Map()
@@ -1047,6 +1067,97 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   }, [test])
 
   const testItem = test ? test.queue[test.idx] : null
+
+  // ——— Veil practice: cover the page and recite from memory, no marks needed ———
+  // full mode veils everything from the frontier on; chain mode shows only each
+  // ayah's first word past the frontier ayah (markers stay visible as the cue chain)
+
+  // move the frontier, rolling word overflow into the next ayah; the session
+  // ends at the surah's edge — the veil never crosses into the next surah
+  const veilTo = (s, a, word) => {
+    const sObj = surahsRef.current.find((x) => x.number === s)
+    const len = sObj?.ayahs[a - 1]?.words.length
+    if (len == null) {
+      setVeil(null) // defensive: frontier ayah not found
+      return
+    }
+    if (word >= len) {
+      a += 1
+      word = 0
+      if (a > sObj.ayahs.length) {
+        setVeil(null)
+        return
+      }
+    }
+    setVeil((v) => (v ? { ...v, surah: s, ayah: a, word } : v))
+  }
+
+  const veilWord = () => {
+    const v = veilRef.current
+    if (v) veilTo(v.surah, v.ayah, v.word + 1)
+  }
+
+  const veilVerse = () => {
+    const v = veilRef.current
+    if (v) veilTo(v.surah, v.ayah + 1, 0)
+  }
+
+  const startVeil = () => {
+    if (testRef.current || cardSelRef.current) return
+    const { surah: s, ayah: a } = readingPos()
+    setVeil({ mode: 'full', surah: s, ayah: a, word: 0 })
+  }
+
+  const toggleVeilMode = () => {
+    const v = veilRef.current
+    if (v) setVeil({ mode: v.mode === 'full' ? 'chain' : 'full', surah: v.surah, ayah: v.ayah, word: 0 })
+  }
+
+  // 'v' starts a session at the current ayah, or toggles full ↔ chain mid-session
+  useEffect(() => {
+    const isTyping = (e) =>
+      e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable
+    const onDown = (e) => {
+      if (e.key !== 'v' || e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.defaultPrevented || isTyping(e)) return
+      if (veilRef.current) toggleVeilMode()
+      else startVeil()
+    }
+    window.addEventListener('keydown', onDown)
+    return () => window.removeEventListener('keydown', onDown)
+  }, [])
+
+  useEffect(() => {
+    if (!veil) return
+    const onKey = (e) => {
+      if (e.defaultPrevented) return
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setVeil(null)
+      } else if (e.key === ' ') {
+        e.preventDefault() // Space reveals — don't scroll the page
+        if (veil.mode === 'full') veilWord()
+        else veilVerse()
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        veilVerse()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [veil])
+
+  // keep the newly revealed word in comfortable view
+  useEffect(() => {
+    if (!veil) return
+    const el = containerRef.current?.querySelector(
+      `[data-key="${veil.surah}:${veil.ayah}:${Math.max(0, veil.word - 1)}"]`
+    )
+    if (el && el.getBoundingClientRect().top > window.innerHeight * 0.8) {
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }
+  }, [veil])
 
   // ——— Mutashabihat: ambient underlines + anchored popover ———
   // Tarteel ranges are 1-indexed into THEIR words (which include the trailing
@@ -1270,6 +1381,17 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
           </svg>
           {recite.status === 'listening' && <span className="listening-dot" />}
         </button>
+        <button
+          className="icon-btn"
+          title="recite from memory (v)"
+          style={veil ? { borderColor: 'var(--bl)', color: 'var(--bl)' } : undefined}
+          onClick={() => (veil ? setVeil(null) : startVeil())}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+            <circle cx="12" cy="12" r="2.8" />
+          </svg>
+        </button>
       </div>
       {(cardSel || recite.status === 'listening' || recite.status === 'error') && (
         <div className={'ctx-pill' + (recite.status === 'error' ? ' err' : '')}>
@@ -1365,6 +1487,12 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                         (a.n === testItem.startAyah || a.n === testItem.ayah) &&
                         (a.n === testItem.ayah && testItem.startAyah !== testItem.ayah ? testItem.startLen + i : i) >=
                           test.reveal
+                      const freeVeiled =
+                        veil &&
+                        !testItem &&
+                        (veil.mode === 'full'
+                          ? afterFrontier(s.number, a.n, i, veil)
+                          : (s.number > veil.surah || (s.number === veil.surah && a.n > veil.ayah)) && i >= 1)
                       return (
                         <span
                           key={i}
@@ -1374,7 +1502,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                             (pend ? ' hl-pending' : '') +
                             (cued ? ' hl-cue' : '') +
                             (picking ? ' pick' : '') +
-                            (veiled ? ' veiled' : '') +
+                            (veiled || freeVeiled ? ' veiled' : '') +
                             (fl ? ' fl fl-j' + (i > 0 ? ' fl-j-prev' : '') : '') +
                             (joinNext || (pend && i < pending.end) || (cued && i < cue.end) ? ' hl-join' : '') +
                             (joinPrev || (pend && i > pending.start) || (cued && i > 0) ? ' hl-join-prev' : '')
@@ -1384,7 +1512,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                           onPointerDown={(e) => {
                             if (!e.isPrimary || e.button !== 0) return
                             e.preventDefault()
-                            if (cardSelRef.current || testRef.current) return // picking a card boundary / testing — clicks only
+                            if (cardSelRef.current || testRef.current || veilRef.current) return // picking a card boundary / testing / veiled — clicks only
                             // touch pointers implicitly capture — release so pointerenter fires on siblings
                             if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
                               e.currentTarget.releasePointerCapture(e.pointerId)
@@ -1485,6 +1613,28 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
             next ›
           </button>
           <button className="ghost" title="end test (Esc)" onClick={() => setTest(null)}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {veil && !testItem && (
+        <div className="test-bar">
+          <span className="test-progress">
+            reciting from {veil.surah}:{veil.ayah}
+          </span>
+          {veil.mode === 'full' && (
+            <button className="ghost" title="reveal one word (Space, or tap a veiled word)" onClick={veilWord}>
+              word
+            </button>
+          )}
+          <button className="ghost" title="reveal to the end of the verse (Enter)" onClick={veilVerse}>
+            verse
+          </button>
+          <button className="ghost" title="first-word chain — only each ayah's first word shows (v)" onClick={toggleVeilMode}>
+            {veil.mode === 'full' ? 'chain' : 'full'}
+          </button>
+          <button className="ghost" title="end (Esc)" onClick={() => setVeil(null)}>
             ✕
           </button>
         </div>
