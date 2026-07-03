@@ -53,7 +53,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const [prefs, setPrefs] = useState(false) // Aa display-settings popover
   const [takrar, setTakrar] = useState(null) // { count, target } — repetition counter, count persisted
   const [veil, setVeil] = useState(null) // { surah, ayah, word } — free-recite frontier, ephemeral
-  const [vis, setVis] = useState(null) // { anchor, cursor } ({surah, ayah} each) — visual mark mode
   const prefsRef = useRef(null)
   const flashTimer = useRef(null)
   const pipEditRef = useRef(false)
@@ -62,7 +61,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const cardSelRef = useRef(null)
   const testRef = useRef(null)
   const veilRef = useRef(null)
-  const visRef = useRef(null)
   const cueMenuRef = useRef(null)
   const mutPopRef = useRef(null)
   const menuRef = useRef(null)
@@ -472,7 +470,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     const onDown = (e) => {
       if ((e.key !== 'j' && e.key !== 'k') || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.defaultPrevented || isTyping(e) || held.has(e.key)) return
-      if (visRef.current) return // visual mark mode owns j/k (extends the selection)
       if (!held.size) {
         start = performance.now()
         last = start
@@ -711,11 +708,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   }
 
   const markWord = (key) => {
-    if (visRef.current) {
-      // visual mark mode is keyboard-driven — word clicks are inert
-      suppressClickRef.current = false
-      return
-    }
     if (veilRef.current) {
       // free recite: tapping a veiled word moves the frontier just past it; revealed words are inert
       suppressClickRef.current = false
@@ -829,7 +821,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   cardSelRef.current = cardSel
   testRef.current = test
   veilRef.current = veil
-  visRef.current = vis
 
   // cancel card-picking on Escape or a pointerdown outside the target ayah
   useEffect(() => {
@@ -915,72 +906,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   // is s:a:i at or past the free-recite veil frontier (i.e. still covered)?
   const afterFrontier = (s, a, i, v) =>
     s > v.surah || (s === v.surah && (a > v.ayah || (a === v.ayah && i >= v.word)))
-
-  // ——— Visual mark mode: ayah-range selection over the loaded surahs ———
-  const visOrder = (v) => {
-    const { anchor: x, cursor: y } = v
-    return x.surah < y.surah || (x.surah === y.surah && x.ayah <= y.ayah) ? [x, y] : [y, x]
-  }
-
-  const inVisRange = (s, a, v) => {
-    const [from, to] = visOrder(v)
-    return (
-      (s > from.surah || (s === from.surah && a >= from.ayah)) &&
-      (s < to.surah || (s === to.surah && a <= to.ayah))
-    )
-  }
-
-  // neighbouring ayah in reading order; returns pos unchanged at the loaded edges
-  const stepAyahPos = (pos, dir) => {
-    const list = surahsRef.current
-    let si = list.findIndex((x) => x.number === pos.surah)
-    if (si < 0) return pos
-    let a = pos.ayah + dir
-    if (a < 1) {
-      if (si === 0) return pos
-      si--
-      a = list[si].ayahs.length
-    } else if (a > list[si].ayahs.length) {
-      if (si === list.length - 1) return pos
-      si++
-      a = 1
-    }
-    return { surah: list[si].number, ayah: a }
-  }
-
-  const visLen = (v) => {
-    const [from, to] = visOrder(v)
-    let pos = from
-    let n = 1
-    while (!(pos.surah === to.surah && pos.ayah === to.ayah)) {
-      const next = stepAyahPos(pos, 1)
-      if (next === pos) break
-      pos = next
-      n++
-    }
-    return n
-  }
-
-  const applyVisual = (color) => {
-    const v = visRef.current
-    if (!v) return
-    const [from, to] = visOrder(v)
-    setHighlights((prev) => {
-      const next = { ...prev }
-      let pos = from
-      for (;;) {
-        const words = surahsRef.current.find((x) => x.number === pos.surah)?.ayahs[pos.ayah - 1]?.words ?? []
-        for (let i = 0; i < words.length; i++) next[`${pos.surah}:${pos.ayah}:${i}`] = color
-        if (pos.surah === to.surah && pos.ayah === to.ayah) break
-        const nxt = stepAyahPos(pos, 1)
-        if (nxt === pos) break
-        pos = nxt
-      }
-      save('highlights', next)
-      return next
-    })
-    setVis(null)
-  }
 
   const markStep = (dir) => {
     if (!markedList.length) return null
@@ -1223,7 +1148,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   }
 
   const startVeil = () => {
-    if (testRef.current || cardSelRef.current || visRef.current) return
+    if (testRef.current || cardSelRef.current) return
     const { surah: s, ayah: a } = readingPos()
     setVeil({ surah: s, ayah: a, word: 0 })
   }
@@ -1272,58 +1197,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       el.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
   }, [veil])
-
-  // 'V' enters visual mark mode at the current ayah; V again leaves
-  useEffect(() => {
-    const isTyping = (e) =>
-      e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable
-    const onDown = (e) => {
-      if (e.key !== 'V' || e.metaKey || e.ctrlKey || e.altKey) return
-      if (e.defaultPrevented || isTyping(e)) return
-      if (visRef.current) {
-        setVis(null)
-        return
-      }
-      if (testRef.current || cardSelRef.current || veilRef.current) return
-      closeMenu()
-      const { surah: s, ayah: a } = readingPos()
-      setVis({ anchor: { surah: s, ayah: a }, cursor: { surah: s, ayah: a } })
-    }
-    window.addEventListener('keydown', onDown)
-    return () => window.removeEventListener('keydown', onDown)
-  }, [])
-
-  // j/k extend the selection an ayah at a time; r/o/p commit a color
-  useEffect(() => {
-    if (!vis) return
-    const onKey = (e) => {
-      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        setVis(null)
-      } else if (e.key === 'j' || e.key === 'k') {
-        e.preventDefault()
-        setVis((v) => v && { ...v, cursor: stepAyahPos(v.cursor, e.key === 'j' ? 1 : -1) })
-      } else if (e.key === 'r' || e.key === 'o' || e.key === 'p') {
-        e.preventDefault()
-        applyVisual({ r: 're', o: 'or', p: 'pu' }[e.key])
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [vis])
-
-  // keep the moving end of the selection comfortably in view
-  useEffect(() => {
-    if (!vis) return
-    const el = containerRef.current?.querySelector(`[data-key^="${vis.cursor.surah}:${vis.cursor.ayah}:"]`)
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    if (r.top < window.innerHeight * 0.15 || r.bottom > window.innerHeight * 0.85) {
-      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }
-  }, [vis])
 
   // ——— Mutashabihat: ambient underlines + anchored popover ———
   // Tarteel ranges are 1-indexed into THEIR words (which include the trailing
@@ -1633,7 +1506,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                   )}
                   {(() => {
                     const mutSet = mutashData[`${s.number}:${a.n}`]?.wordSet
-                    const inVis = vis && inVisRange(s.number, a.n, vis)
                     const renderWord = (w, i) => {
                       const key = `${s.number}:${a.n}:${i}`
                       const hl = highlights[key]
@@ -1662,7 +1534,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                             'w' +
                             (hl ? ' hl-' + hl : '') +
                             (pend ? ' hl-pending' : '') +
-                            (inVis ? ' vis' : '') +
                             (cued ? ' hl-cue' : '') +
                             (picking ? ' pick' : '') +
                             (veiled || freeVeiled ? ' veiled' : '') +
@@ -1675,7 +1546,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                           onPointerDown={(e) => {
                             if (!e.isPrimary || e.button !== 0) return
                             e.preventDefault()
-                            if (cardSelRef.current || testRef.current || veilRef.current || visRef.current) return // picking a card boundary / testing / veiled / visual — clicks only
+                            if (cardSelRef.current || testRef.current || veilRef.current) return // picking a card boundary / testing / veiled — clicks only
                             // touch pointers implicitly capture — release so pointerenter fires on siblings
                             if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
                               e.currentTarget.releasePointerCapture(e.pointerId)
@@ -1725,7 +1596,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                   <span
                     className={
                       'marker' +
-                      (vis && inVisRange(s.number, a.n, vis) ? ' vis' : '') +
                       (isCarded(s.number, a.n) ? ' carded' : '') +
                       (cardSel && cardSel.surah === s.number && cardSel.ayah === a.n ? ' picking' : '') +
                       (flash === `${s.number}:${a.n}` ? ' fl fl-j-prev' : '')
@@ -1794,25 +1664,6 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
             line
           </button>
           <button className="ghost" title="end (Esc)" onClick={() => setVeil(null)}>
-            ✕
-          </button>
-        </div>
-      )}
-
-      {vis && (
-        <div className="test-bar">
-          <span className="test-progress">
-            visual · {visLen(vis)} {visLen(vis) === 1 ? 'ayah' : 'ayahs'} · j/k extend
-          </span>
-          {COLORS.map((c) => (
-            <button
-              key={c}
-              className={'hl-swatch ' + c}
-              title={c === 're' ? 'red — word slip (r)' : c === 'or' ? 'orange — tajwīd (o)' : 'purple — mutashābihah (p)'}
-              onClick={() => applyVisual(c)}
-            />
-          ))}
-          <button className="ghost" title="end (Esc)" onClick={() => setVis(null)}>
             ✕
           </button>
         </div>

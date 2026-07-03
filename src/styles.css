@@ -751,19 +751,6 @@ button {
   background: var(--hl);
 }
 
-/* Visual mark mode — selected ayahs get a neutral pending-style band. The
-   pill bleeds half the word gap each side (opaque mix, so overlaps don't
-   double-darken) to read as one continuous run. */
-.mushaf .w.vis::before,
-.mushaf .marker.vis::before {
-  content: '';
-  position: absolute;
-  inset: 0 -0.45em;
-  z-index: -2;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--tx-3) 16%, var(--bg));
-}
-
 .mic-btn.active {
   border-color: var(--gr);
   color: var(--gr);
@@ -1252,12 +1239,6 @@ button {
   border: 1px solid var(--ui);
   color: var(--tx-2);
   font-size: 12px;
-}
-.test-bar .hl-swatch {
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  flex: none;
 }
 .test-bar .ghost {
   padding: 4px 10px;
