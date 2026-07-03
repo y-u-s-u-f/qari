@@ -51,9 +51,8 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const [flash, setFlash] = useState(null) // 'S:A' tinted for a moment after a jump, to locate it
   const [fontSize, setFontSize] = useState(() => load('fontSize', 32)) // mushaf text size, px
   const [prefs, setPrefs] = useState(false) // Aa display-settings popover
-  const [takrar, setTakrar] = useState(null) // { count, target } — repetition counter, ephemeral
+  const [takrar, setTakrar] = useState(null) // { count, target } — repetition counter, count persisted
   const [veil, setVeil] = useState(null) // { surah, ayah, word } — free-recite frontier, ephemeral
-  const takrarTimer = useRef(null)
   const prefsRef = useRef(null)
   const flashTimer = useRef(null)
   const pipEditRef = useRef(false)
@@ -507,7 +506,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       if ((e.key !== 't' && e.key !== 'h' && e.key !== 'l') || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.defaultPrevented || isTyping(e)) return
       if (e.key === 't') {
-        setTakrar((t) => (t ? null : { count: 0, target: load('takrarTarget', 11) }))
+        setTakrar((t) => (t ? null : { count: load('takrarCount', 0), target: load('takrarTarget', 11) }))
       } else if (e.key === 'l') {
         setTakrar((t) => (t ? { ...t, count: t.count + 1 } : t))
       } else {
@@ -518,12 +517,9 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
     return () => window.removeEventListener('keydown', onDown)
   }, [])
 
-  // Takrar auto-clear ~1.5s after the target is reached (also cleans up on t/unmount)
+  // Count survives close/reopen — only 't' dismisses the pill
   useEffect(() => {
-    clearTimeout(takrarTimer.current)
-    if (takrar && takrar.count >= takrar.target)
-      takrarTimer.current = setTimeout(() => setTakrar(null), 1500)
-    return () => clearTimeout(takrarTimer.current)
+    if (takrar) save('takrarCount', takrar.count)
   }, [takrar])
 
   // Scroll / resize handling
