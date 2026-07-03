@@ -709,12 +709,15 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
 
   const markWord = (key) => {
     if (veilRef.current) {
-      // free recite: tapping a veiled word moves the frontier just past it; revealed words are inert
-      suppressClickRef.current = false
+      // free recite: tapping a veiled word moves the frontier just past it;
+      // revealed words fall through so mistakes can be marked mid-recitation
       const v = veilRef.current
       const [ws, wa, wi] = key.split(':').map(Number)
-      if (afterFrontier(ws, wa, wi, v)) veilTo(ws, wa, wi + 1)
-      return
+      if (afterFrontier(ws, wa, wi, v)) {
+        suppressClickRef.current = false
+        veilTo(ws, wa, wi + 1)
+        return
+      }
     }
     if (testRef.current) {
       // testing: clicking a veiled word reveals one more; revealed words are inert
@@ -1173,6 +1176,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       if (e.defaultPrevented) return
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return
       if (e.key === 'Escape') {
+        if (menuRef.current) return // an open color menu is the top layer — it consumes this Escape
         e.preventDefault()
         setVeil(null)
       } else if (e.key === 'w' && !e.metaKey && !e.ctrlKey && !e.altKey) {
@@ -1546,7 +1550,8 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                           onPointerDown={(e) => {
                             if (!e.isPrimary || e.button !== 0) return
                             e.preventDefault()
-                            if (cardSelRef.current || testRef.current || veilRef.current) return // picking a card boundary / testing / veiled — clicks only
+                            if (cardSelRef.current || testRef.current) return // picking a card boundary / testing — clicks only
+                            if (veilRef.current && afterFrontier(s.number, a.n, i, veilRef.current)) return // veiled words: tap to reveal only
                             // touch pointers implicitly capture — release so pointerenter fires on siblings
                             if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
                               e.currentTarget.releasePointerCapture(e.pointerId)
@@ -1557,6 +1562,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
                           onPointerEnter={() => {
                             const d = dragRef.current
                             if (!d || d.surah !== s.number || d.ayah !== a.n || d.end === i) return
+                            if (veilRef.current && afterFrontier(s.number, a.n, i, veilRef.current)) return // don't select under the veil
                             d.end = i
                             setPending({
                               surah: d.surah,
