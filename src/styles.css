@@ -700,14 +700,19 @@ button {
   margin: 0;
 }
 
-/* Hard-step focus band: dimmed lines get .dim toggled per rendered line */
+/* Focus band: dimmed lines get .dim toggled per rendered line. While the
+   .reader is .scrolling everything reads at full ink; the color transition
+   animates the band narrowing back in once scrolling settles. */
 .mushaf .w,
 .mushaf .marker,
 .basmala span {
-  transition: none; /* hard step, no fade */
+  transition: color 0.45s ease;
 }
 .dim {
   color: var(--tx-3);
+}
+.scrolling .dim {
+  color: inherit;
 }
 
 .mushaf .w {
@@ -855,6 +860,12 @@ button {
 }
 .marker.carded.dim {
   color: color-mix(in srgb, var(--ye) 55%, var(--bg));
+}
+.scrolling .marker.dim {
+  color: var(--tx-2);
+}
+.scrolling .marker.carded.dim {
+  color: var(--ye);
 }
 
 .sentinel {
@@ -1381,6 +1392,10 @@ button {
 }
 .page-sep.dim {
   opacity: 0.55;
+  transition: opacity 0.45s ease;
+}
+.scrolling .page-sep.dim {
+  opacity: 1;
 }
 
 .page-pip-input {
@@ -1437,6 +1452,9 @@ button {
 /* every word in the run dimmed → grey the line (runs straddling the band stay purple) */
 .mushaf .mut-run:not(:has(.w:not(.dim))) {
   text-decoration-color: var(--ui-2);
+}
+.scrolling .mushaf .mut-run:not(:has(.w:not(.dim))) {
+  text-decoration-color: color-mix(in srgb, var(--pu) 60%, transparent);
 }
 .mut-star {
   color: var(--pu);

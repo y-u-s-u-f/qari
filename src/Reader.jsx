@@ -78,6 +78,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const targetRef = useRef({ surah, ayah })
   const didInitialScroll = useRef(false)
   const saveTimer = useRef(null)
+  const scrollInkTimer = useRef(null) // .scrolling class lingers until scroll settles
   const sentinelRef = useRef(null)
   const topSentinelRef = useRef(null)
   const lastScrollRef = useRef(0)
@@ -529,6 +530,13 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   useEffect(() => {
     let ticking = false
     const onScroll = () => {
+      // while scrolling the whole page reads at full ink; the band eases back in on stop
+      const root = containerRef.current
+      if (root) {
+        root.classList.add('scrolling')
+        clearTimeout(scrollInkTimer.current)
+        scrollInkTimer.current = setTimeout(() => root.classList.remove('scrolling'), 160)
+      }
       if (!ticking) {
         ticking = true
         requestAnimationFrame(() => {
@@ -556,6 +564,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
       window.removeEventListener('resize', onResize)
       clearTimeout(saveTimer.current)
       clearTimeout(jumpTimer.current)
+      clearTimeout(scrollInkTimer.current)
     }
   }, [])
 
