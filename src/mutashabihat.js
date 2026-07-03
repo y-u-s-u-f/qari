@@ -3,8 +3,7 @@ import { load, save } from './store'
 const mem = new Map()
 const MAX_AGE = 30 * 24 * 60 * 60 * 1000
 
-export async function fetchMutashabihat(surah, ayah) {
-  const key = `mutash.${surah}:${ayah}`
+async function callTool(key, name, args) {
   if (mem.has(key)) return mem.get(key)
   const cached = load(key, null)
   if (cached && Date.now() - cached.t < MAX_AGE) {
@@ -18,7 +17,7 @@ export async function fetchMutashabihat(surah, ayah) {
       jsonrpc: '2.0',
       id: 1,
       method: 'tools/call',
-      params: { name: 'ayah_mutashabihat', arguments: { surah, ayah } },
+      params: { name, arguments: args },
     }),
   })
   if (!res.ok) throw new Error('request failed: ' + res.status)
@@ -43,4 +42,12 @@ export async function fetchMutashabihat(surah, ayah) {
     // localStorage full — in-memory cache still works
   }
   return data
+}
+
+export function fetchMutashabihat(surah, ayah) {
+  return callTool(`mutash.${surah}:${ayah}`, 'ayah_mutashabihat', { surah, ayah })
+}
+
+export function fetchPhraseMutashabihat(phraseText) {
+  return callTool('mutash.p.' + phraseText, 'phrase_mutashabihat', { phrase_text: phraseText })
 }

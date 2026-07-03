@@ -2,7 +2,7 @@ import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 
 import { getSurah, toArabicDigits } from './quran'
 import { getReciter } from './recite'
 import { load, save } from './store'
-import { fetchMutashabihat } from './mutashabihat'
+import { fetchMutashabihat, fetchPhraseMutashabihat } from './mutashabihat'
 import navData from './nav-data.json'
 
 // Mistake mark colors: red (word slip) · orange (tajwīd) · purple (mutashābihah)
@@ -1047,10 +1047,8 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
 
   // Tarteel's occurrence text uses a different Uthmani encoding that our KFGQPC
   // font can't shape (dotted circles) — swap in our own words for every preview
-  const enrichMutash = (s, a, data) => {
-    const entry = processMutash(s, a, data)
-    const keys = new Set()
-    for (const p of entry.phrases) for (const o of p.occurrences) keys.add(o.ayah_key)
+  const attachOurWords = (occs) => {
+    const keys = new Set(occs.map((o) => o.ayah_key))
     return Promise.all(
       [...keys].map((k) => {
         const [os, oa] = k.split(':').map(Number)
@@ -1058,14 +1056,17 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
       })
     ).then((pairs) => {
       const texts = Object.fromEntries(pairs)
-      for (const p of entry.phrases) {
-        for (const o of p.occurrences) {
-          const w = texts[o.ayah_key]
-          if (w?.length) o.ourWords = w
-        }
+      for (const o of occs) {
+        const w = texts[o.ayah_key]
+        if (w?.length) o.ourWords = w
       }
-      return entry
+      return occs
     })
+  }
+
+  const enrichMutash = (s, a, data) => {
+    const entry = processMutash(s, a, data)
+    return attachOurWords(entry.phrases.flatMap((p) => p.occurrences)).then(() => entry)
   }
 
   // quietly fetch twins for ayahs resting in the focus band (cached 30 days)
@@ -1114,19 +1115,47 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
       left: cx + window.scrollX,
       top: (above ? Math.min(ra.top, rb.top) - 10 : Math.max(ra.bottom, rb.bottom) + 10) + window.scrollY,
       above,
+      mode: 'ayah',
       status: 'ready',
     }
     const key = `${p.surah}:${p.ayah}`
-    if (!mutashData[key]) {
-      pop.status = 'loading'
+    const samePop = (m) => m && m.surah === p.surah && m.ayah === p.ayah
+    const loadAyah = () => {
+      if (mutashData[key]) {
+        setMutPop((m) => (samePop(m) ? { ...m, mode: 'ayah', status: 'ready' } : m))
+        return
+      }
       requestedMutash.current.add(key)
       fetchMutashabihat(p.surah, p.ayah)
         .then((data) => enrichMutash(p.surah, p.ayah, data))
         .then((entry) => {
           setMutashData((prev) => ({ ...prev, [key]: entry }))
-          setMutPop((m) => (m && m.surah === p.surah && m.ayah === p.ayah ? { ...m, status: 'ready' } : m))
+          setMutPop((m) => (samePop(m) ? { ...m, mode: 'ayah', status: 'ready' } : m))
         })
-        .catch((err) => setMutPop((m) => (m && m.surah === p.surah ? { ...m, status: 'error', error: err.message } : m)))
+        .catch((err) =>
+          setMutPop((m) => (samePop(m) ? { ...m, mode: 'ayah', status: 'error', error: err.message } : m))
+        )
+    }
+    // 2+ selected words → look up that exact phrase; failures fall back to the ayah list
+    const words = surahsRef.current.find((x) => x.number === p.surah)?.ayahs[p.ayah - 1]?.words ?? []
+    const phraseWords = words.slice(p.start, p.end + 1).filter((w) => !ORNAMENTS.has(w))
+    if (phraseWords.length >= 2) {
+      pop.mode = 'phrase'
+      pop.phrase = phraseWords.join(' ')
+      pop.status = 'loading'
+      fetchPhraseMutashabihat(pop.phrase)
+        .then((data) => {
+          if (!data.found || !data.occurrences?.length) return null
+          return attachOurWords(data.occurrences).then(() => data)
+        })
+        .then((data) => {
+          if (data) setMutPop((m) => (samePop(m) ? { ...m, status: 'ready', entry: data } : m))
+          else loadAyah()
+        })
+        .catch(() => loadAyah())
+    } else if (!mutashData[key]) {
+      pop.status = 'loading'
+      loadAyah()
     }
     setMutPop(pop)
   }
@@ -1136,6 +1165,26 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
     setMutPop(null)
     setPending(null)
     jumpTo(s, a)
+  }
+
+  // one occurrence preview row — ≤5 words of context each side of the tinted match
+  const occRow = (o, oi) => {
+    const [f, t] = o.ranges[0]
+    const ow = o.ourWords ?? o.words
+    const before = ow.slice(Math.max(0, f - 1 - 5), f - 1)
+    const after = ow.slice(t, t + 5)
+    return (
+      <button key={oi} className="mut-occ" onClick={() => gotoOccurrence(o.ayah_key)}>
+        <div className="mut-occ-ref">
+          {o.surah_name} {o.ayah_key}
+        </div>
+        <div className="mut-occ-ar" dir="rtl" lang="ar">
+          {f - 1 > 5 ? '… ' : ''}{before.join(' ')}{' '}
+          <span className="mut-seg">{ow.slice(f - 1, t).join(' ')}</span>{' '}
+          {after.join(' ')}{ow.length > t + 5 ? ' …' : ''}
+        </div>
+      </button>
+    )
   }
 
   useEffect(() => {
@@ -1548,7 +1597,19 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
         >
           {mutPop.status === 'loading' && <div className="mut-note">Looking for similar phrases…</div>}
           {mutPop.status === 'error' && <div className="mut-note err">Could not load: {mutPop.error}</div>}
+          {mutPop.status === 'ready' && mutPop.mode === 'phrase' && (
+            <section className="mut-phrase">
+              <div className="mut-phrase-ar" dir="rtl" lang="ar">
+                {mutPop.phrase}
+              </div>
+              <div className="mut-caption">
+                appears {mutPop.entry.count}× · {mutPop.entry.surahs} surah{mutPop.entry.surahs === 1 ? '' : 's'}
+              </div>
+              {mutPop.entry.occurrences.map(occRow)}
+            </section>
+          )}
           {mutPop.status === 'ready' &&
+            mutPop.mode === 'ayah' &&
             (() => {
               const entry = mutashData[`${mutPop.surah}:${mutPop.ayah}`]
               const overlapping =
@@ -1567,24 +1628,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme }) {
                     <div className="mut-caption">
                       appears {p.count}× · {p.surahs} surah{p.surahs === 1 ? '' : 's'}
                     </div>
-                    {p.occurrences.map((o, oi) => {
-                      const [f, t] = o.ranges[0]
-                      const ow = o.ourWords ?? o.words
-                      const before = ow.slice(Math.max(0, f - 1 - 5), f - 1)
-                      const after = ow.slice(t, t + 5)
-                      return (
-                        <button key={oi} className="mut-occ" onClick={() => gotoOccurrence(o.ayah_key)}>
-                          <div className="mut-occ-ref">
-                            {o.surah_name} {o.ayah_key}
-                          </div>
-                          <div className="mut-occ-ar" dir="rtl" lang="ar">
-                            {f - 1 > 5 ? '… ' : ''}{before.join(' ')}{' '}
-                            <span className="mut-seg">{ow.slice(f - 1, t).join(' ')}</span>{' '}
-                            {after.join(' ')}{ow.length > t + 5 ? ' …' : ''}
-                          </div>
-                        </button>
-                      )
-                    })}
+                    {p.occurrences.map(occRow)}
                   </section>
                 )
               })
