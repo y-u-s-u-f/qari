@@ -80,6 +80,7 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   const didInitialScroll = useRef(false)
   const saveTimer = useRef(null)
   const scrollInkTimer = useRef(null) // .scrolling class lingers until scroll settles
+  const scrollInkRef = useRef({ y: 0, dist: 0 }) // distance travelled this scroll burst
   const sentinelRef = useRef(null)
   const topSentinelRef = useRef(null)
   const lastScrollRef = useRef(0)
@@ -528,13 +529,25 @@ export default function Reader({ surah, ayah, nav, goHome, theme, setTheme, pale
   // Scroll / resize handling
   useEffect(() => {
     let ticking = false
+    scrollInkRef.current = { y: window.scrollY, dist: 0 }
     const onScroll = () => {
-      // while scrolling the whole page reads at full ink; the band eases back in on stop
+      // sustained scrolling opens the whole page to full ink; the band eases back
+      // in on stop. Small nudges (a line or two, e.g. j/k) stay banded — the class
+      // only goes on once a burst travels ~2.5 lines.
       const root = containerRef.current
       if (root) {
-        root.classList.add('scrolling')
+        const st = scrollInkRef.current
+        const y = window.scrollY
+        st.dist += Math.abs(y - st.y)
+        st.y = y
+        const l = linesRef.current
+        const lineH = l.length > 1 ? l[1].top - l[0].top : 80
+        if (st.dist > lineH * 2.5) root.classList.add('scrolling')
         clearTimeout(scrollInkTimer.current)
-        scrollInkTimer.current = setTimeout(() => root.classList.remove('scrolling'), 160)
+        scrollInkTimer.current = setTimeout(() => {
+          root.classList.remove('scrolling')
+          st.dist = 0
+        }, 160)
       }
       if (!ticking) {
         ticking = true
