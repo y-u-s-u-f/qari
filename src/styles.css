@@ -1,0 +1,1284 @@
+/* ——— Flexoki (stephango.com/flexoki) ——— */
+:root {
+  --bg: #fffcf0;
+  --bg-2: #f2f0e5;
+  --ui: #e6e4d9;
+  --ui-2: #dad8ce;
+  --ui-3: #cecdc3;
+  --tx: #100f0f;
+  --tx-2: #6f6e69;
+  --tx-3: #b7b5ac;
+  --re: #af3029;
+  --or: #bc5215;
+  --ye: #ad8301;
+  --gr: #66800b;
+  --bl: #205ea6;
+  --pu: #5e409d;
+}
+
+[data-theme='dark'] {
+  --bg: #100f0f;
+  --bg-2: #1c1b1a;
+  --ui: #282726;
+  --ui-2: #343331;
+  --ui-3: #403e3c;
+  --tx: #cecdc3;
+  --tx-2: #878580;
+  --tx-3: #575653;
+  --re: #d14d41;
+  --or: #da702c;
+  --ye: #d0a215;
+  --gr: #879a39;
+  --bl: #4385be;
+  --pu: #8b7ec8;
+}
+
+/* KFGQPC HAFS Uthmanic Script v22, bundled */
+@font-face {
+  font-family: 'KFGQPC Local';
+  src: url('/fonts/UthmanicHafs_V22.ttf') format('truetype');
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-anchor: none; /* the reader compensates prepended content itself */
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tx);
+  font-family: Inter, system-ui, sans-serif;
+  transition: background 0.2s, color 0.2s;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
+
+.muted {
+  color: var(--tx-2);
+  font-size: 14px;
+}
+.center {
+  text-align: center;
+}
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tx-2);
+  margin: 28px 0 10px;
+}
+
+/* ——— Home ——— */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.brand-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 34px;
+  color: var(--ye);
+}
+.brand-en {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tx-2);
+}
+
+.ghost {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-2);
+  background: var(--bg-2);
+  color: var(--tx-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+.ghost:hover {
+  color: var(--tx);
+}
+
+.continue-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--ui-2);
+  background: var(--bg-2);
+  text-align: left;
+}
+.continue-card:hover {
+  border-color: var(--ye);
+}
+.continue-card .label {
+  margin: 0 0 6px;
+}
+.continue-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+.continue-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 30px;
+  color: var(--ye);
+  white-space: nowrap;
+}
+
+.nav-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.nav-card {
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--ui-2);
+  background: var(--bg-2);
+  text-align: left;
+}
+.nav-card:hover {
+  border-color: var(--ui-3);
+}
+.nav-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.nav-sub {
+  font-size: 13px;
+  color: var(--tx-2);
+  margin-top: 4px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-2);
+  background: var(--bg-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+.chip:hover {
+  border-color: var(--ye);
+}
+
+.search {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-2);
+  background: var(--bg-2);
+  color: var(--tx);
+  font: inherit;
+  font-size: 14px;
+  margin-bottom: 14px;
+  outline: none;
+}
+.search:focus {
+  border-color: var(--bl);
+}
+
+.surah-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+.surah-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--ui);
+  background: var(--bg-2);
+  text-align: left;
+}
+.surah-card:hover {
+  border-color: var(--ye);
+}
+.surah-num {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--ui);
+  color: var(--tx-2);
+  font-size: 12px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+.surah-names {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.surah-en {
+  font-size: 14px;
+  font-weight: 600;
+}
+.surah-tr {
+  font-size: 12px;
+  color: var(--tx-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.surah-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 19px;
+  color: var(--tx-2);
+  white-space: nowrap;
+}
+
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--tx);
+  color: var(--bg);
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  max-width: 90vw;
+}
+
+/* ——— Reader ——— */
+.reader-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--ui);
+}
+.hint {
+  font-size: 12px;
+  color: var(--tx-2);
+}
+
+/* ——— Floating reader icons ——— */
+.reader-icons {
+  position: fixed;
+  top: 13px;
+  left: 13px;
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  position: relative;
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ui-2);
+  border-radius: 10px;
+  background: var(--bg-2);
+  color: var(--tx-2);
+}
+.icon-btn:hover:not(:disabled) {
+  color: var(--tx);
+}
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.icon-btn .marks-count {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  margin-inline-start: 0;
+  border: 1px solid var(--bg);
+}
+.icon-btn .listening-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+}
+
+/* contextual pill — only shown when there is something to say */
+.ctx-pill {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  max-width: min(64vw, 560px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--ui);
+  color: var(--tx-2);
+  font-size: 12px;
+  text-align: center;
+}
+.ctx-pill.err {
+  color: var(--re);
+}
+
+/* ——— Display settings (Aa): font size + theme ——— */
+.prefs-wrap {
+  position: fixed;
+  top: 13px;
+  right: 13px;
+  z-index: 30;
+}
+.aa-btn {
+  font-size: 14px;
+}
+.prefs-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: 176px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--ui-2);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+.prefs-row {
+  display: flex;
+  border: 1px solid var(--ui-2);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.prefs-row > * + * {
+  border-left: 1px solid var(--ui-2);
+}
+.prefs-row button {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tx-2);
+  background: var(--bg-2);
+}
+.prefs-row button:hover:not(:disabled) {
+  color: var(--tx);
+}
+.prefs-row button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.prefs-row button.on {
+  background: var(--ui);
+  color: var(--tx);
+}
+.prefs-val {
+  flex: none;
+  width: 36px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--tx-3);
+  background: var(--bg-2);
+}
+.reader {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 28px 40vh;
+}
+
+.surah-head {
+  margin: 48px 0 8px;
+  padding: 14px;
+  border: 1px solid var(--ui);
+  border-radius: 14px;
+  text-align: center;
+}
+.surah-head-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 29px;
+  color: var(--tx-2);
+}
+.surah-head-en {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tx-3);
+  margin-top: 6px;
+}
+
+.basmala {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: calc(var(--mushaf-size, 32px) * 0.875);
+  text-align: center;
+  margin: 24px 0 8px;
+}
+
+.mushaf {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: var(--mushaf-size, 32px);
+  line-height: 2.4;
+  text-align: justify;
+  margin: 0;
+}
+
+/* Hard-step focus band: dimmed lines get .dim toggled per rendered line */
+.mushaf .w,
+.mushaf .marker,
+.basmala span {
+  transition: none; /* hard step, no fade */
+}
+.dim {
+  color: var(--tx-3);
+}
+
+.mushaf .w {
+  cursor: pointer;
+  position: relative;
+  border-radius: 6px;
+  padding: 0 0.08em;
+}
+
+/* Mistake highlight pills (highlighte.rs style). Painted on a ::before layer
+   behind the text (z-index -1): Arabic glyph tails overhang word boxes, so a
+   background on the word itself would clip the previous word's tails. Opaque
+   mixes so joined pills overlap seamlessly instead of double-darkening. */
+.hl-re {
+  --hl: color-mix(in srgb, var(--re) 18%, var(--bg));
+}
+.hl-or {
+  --hl: color-mix(in srgb, var(--or) 18%, var(--bg));
+}
+.hl-pu {
+  --hl: color-mix(in srgb, var(--pu) 18%, var(--bg));
+}
+/* Pending selection (color not chosen yet) — neutral pill, wins over existing colors */
+.hl-pending {
+  --hl: color-mix(in srgb, var(--tx-3) 16%, var(--bg));
+}
+.mushaf .w.hl-re::before,
+.mushaf .w.hl-or::before,
+.mushaf .w.hl-pu::before,
+.mushaf .w.hl-pending::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--hl);
+}
+
+.mic-btn.active {
+  border-color: var(--gr);
+  color: var(--gr);
+}
+.listening-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gr);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+.recite-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--tx) 30%, transparent);
+  display: grid;
+  place-items: center;
+}
+.recite-modal {
+  background: var(--bg);
+  border: 1px solid var(--ui-2);
+  border-radius: 18px;
+  padding: 36px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+  width: calc(100vw - 48px);
+}
+.recite-orb {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  background: var(--bg-2);
+  border: 1px solid var(--ui-2);
+}
+.recite-orb.live {
+  border-color: var(--gr);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.recite-status {
+  font-size: 14px;
+  color: var(--tx-2);
+  text-align: center;
+}
+.recite-transcript {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 24px;
+  text-align: center;
+  color: var(--tx-2);
+  max-height: 120px;
+  overflow: hidden;
+}
+.recite-candidates {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rec-progress {
+  width: 100%;
+  max-width: 360px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ui);
+  overflow: hidden;
+}
+.rec-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--gr);
+  transition: width 0.3s;
+}
+.primary.listening {
+  background: var(--gr);
+}
+
+.marker {
+  cursor: pointer;
+  font-size: 0.95em;
+  color: var(--tx-2);
+  padding: 0 0.15em;
+  position: relative; /* anchor for the .fl locate-flash pseudo */
+}
+.marker.carded {
+  color: var(--ye);
+}
+.marker.dim {
+  color: var(--tx-3);
+}
+.marker.carded.dim {
+  color: color-mix(in srgb, var(--ye) 55%, var(--bg));
+}
+
+.sentinel {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--tx-3);
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 20px;
+}
+
+/* ——— Flashcards ——— */
+.cards-page .reader-bar {
+  margin: -24px -24px 0;
+}
+.card-frame {
+  margin-top: 48px;
+  padding: 44px 36px;
+  border: 1px solid var(--ui-2);
+  border-radius: 16px;
+  background: var(--bg-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.card-frame.empty {
+  gap: 8px;
+}
+.empty-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+.card-meta {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tx-2);
+}
+.card-prompt {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 34px;
+  text-align: center;
+}
+.card-answer {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 28px;
+  line-height: 2.1;
+  text-align: center;
+  border-top: 1px solid var(--ui-2);
+  padding-top: 22px;
+  margin-top: 4px;
+}
+.card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+.primary {
+  padding: 11px 22px;
+  border-radius: 10px;
+  background: var(--tx);
+  color: var(--bg);
+  font-weight: 600;
+  font-size: 14px;
+}
+.grade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 84px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fffcf0;
+}
+.grade.re {
+  background: var(--re);
+}
+.grade.or {
+  background: var(--or);
+}
+.grade.gr {
+  background: var(--gr);
+}
+.grade.bl {
+  background: var(--bl);
+}
+.grade-ivl {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* ——— command bar ——— */
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.cmdk-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: color-mix(in srgb, var(--tx) 30%, transparent);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.cmdk-panel {
+  margin-top: 15vh;
+  width: min(640px, calc(100vw - 32px));
+  background: var(--bg);
+  border: 1px solid var(--ui-2);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px color-mix(in srgb, var(--tx) 18%, transparent);
+}
+.cmdk-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--tx);
+  font-size: 17px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--ui);
+}
+.cmdk-input::placeholder {
+  color: var(--tx-3);
+}
+.cmdk-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 6px;
+}
+.cmdk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.cmdk-row.sel {
+  background: var(--bg-2);
+}
+.cmdk-badge {
+  flex: none;
+  min-width: 48px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tx-2);
+  background: var(--ui);
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+.cmdk-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.cmdk-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tx);
+}
+.cmdk-sub {
+  font-size: 12px;
+  color: var(--tx-3);
+}
+.cmdk-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 17px;
+  color: var(--tx-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cmdk-empty {
+  padding: 18px;
+  text-align: center;
+  color: var(--tx-3);
+  font-size: 13px;
+}
+
+/* ——— Mistake marking: connected pills, drag selection, floating menu ——— */
+.mushaf {
+  user-select: none;
+}
+.mushaf .w {
+  touch-action: pan-y;
+}
+/* Bridge the inter-word gap on the ::before layer — behind all glyphs, so
+   nothing gets clipped. 0.9em covers even justify-stretched spaces; opaque
+   pill color makes the overlap with the next word's pill invisible. */
+.mushaf .w.hl-join::before {
+  inset-inline-end: -0.9em;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.mushaf .w.hl-join-prev::before {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+/* Floating color menu — design-tool tooltip bubble above the selection.
+   Positioned in document coordinates from JS (MENU_W/MENU_H in Reader.jsx
+   must match this footprint). */
+.hl-menu {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--ui);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+/* caret: a rotated square sharing the bubble's bg + border */
+.hl-menu::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  background: var(--bg);
+  border-right: 1px solid var(--ui);
+  border-bottom: 1px solid var(--ui);
+  transform: rotate(45deg);
+}
+.hl-menu.below::after {
+  bottom: auto;
+  top: -6px;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid var(--ui);
+  border-top: 1px solid var(--ui);
+}
+.hl-swatch {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+}
+.hl-swatch.re {
+  background: var(--re);
+}
+.hl-swatch.or {
+  background: var(--or);
+}
+.hl-swatch.pu {
+  background: var(--pu);
+}
+.hl-swatch:hover {
+  filter: brightness(1.1);
+}
+.hl-menu-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--ui-2);
+  margin: 0 2px;
+}
+.hl-menu-remove {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--tx-2);
+  font-size: 12px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+.hl-menu-remove:hover {
+  color: var(--tx);
+}
+
+/* ——— Page number pip — always visible, click to jump ——— */
+.page-pip {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--ui);
+  color: var(--tx-2);
+  font-size: 12px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.page-pip.scrubbing {
+  transform: translateY(-50%) scale(1.15);
+  border-color: color-mix(in srgb, var(--ye) 70%, var(--ui));
+}
+/* ——— Inline marks navigator — left edge, mirrors the page pip ——— */
+.marks-nav {
+  position: fixed;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.marks-nav .icon-btn {
+  border-radius: 999px;
+}
+
+/* ——— Mistake self-test: veiled words + bottom control bar ——— */
+.mushaf .w.veiled {
+  filter: blur(0.22em);
+  opacity: 0.55;
+}
+.mushaf .w.veiled::before {
+  visibility: hidden; /* no highlight colour leaking through the blur */
+}
+.test-bar {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 6px 14px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--ui);
+  color: var(--tx-2);
+  font-size: 12px;
+}
+.test-bar .ghost {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.test-progress {
+  margin-inline-end: 6px;
+  white-space: nowrap;
+}
+
+/* flashcard cue: golden pill over the words kept visible on the card */
+.hl-cue {
+  --hl: color-mix(in srgb, var(--ye) 24%, var(--bg));
+}
+.mushaf .w.hl-cue::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--hl);
+}
+.mushaf .w.hl-cue.hl-join::before {
+  inset-inline-end: -0.9em;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.mushaf .w.hl-cue.hl-join-prev::before {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+/* picking the card boundary: target ayah invites clicks */
+.mushaf .w.pick {
+  cursor: crosshair;
+  text-decoration: underline dotted var(--ye) 1px;
+  text-underline-offset: 0.28em;
+}
+.marker.picking {
+  color: var(--ye);
+}
+.cue-menu {
+  transform: translate(-50%, -100%);
+}
+.cue-menu.below {
+  transform: translateX(-50%);
+}
+.cue-label {
+  font-size: 11px;
+  color: var(--tx-3);
+  padding: 0 4px 0 6px;
+  user-select: none;
+}
+
+/* ——— Marks drawer ——— */
+.marks-count {
+  font-size: 10px;
+  background: var(--ui);
+  border-radius: 999px;
+  padding: 1px 6px;
+  margin-inline-start: 6px;
+  color: var(--tx-2);
+}
+.marks-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.marks-step {
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 10px;
+}
+.marks-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 12px;
+}
+.marks-f {
+  height: 22px;
+  min-width: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-2);
+  background: var(--bg-2);
+  color: var(--tx-2);
+  font-size: 11px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+.marks-f.f-re {
+  background: color-mix(in srgb, var(--re) 30%, var(--bg));
+}
+.marks-f.f-or {
+  background: color-mix(in srgb, var(--or) 30%, var(--bg));
+}
+.marks-f.f-pu {
+  background: color-mix(in srgb, var(--pu) 30%, var(--bg));
+}
+.marks-f.on {
+  border-color: var(--tx-2);
+}
+.marks-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-inline-end: 5px;
+  vertical-align: baseline;
+}
+.marks-dot.f-re {
+  background: var(--re);
+}
+.marks-dot.f-or {
+  background: var(--or);
+}
+.marks-dot.f-pu {
+  background: var(--pu);
+}
+.mseg {
+  border-radius: 4px;
+  padding: 0 0.1em;
+}
+.mseg-re {
+  background: color-mix(in srgb, var(--re) 22%, var(--bg));
+}
+.mseg-or {
+  background: color-mix(in srgb, var(--or) 22%, var(--bg));
+}
+.mseg-pu {
+  background: color-mix(in srgb, var(--pu) 22%, var(--bg));
+}
+.mut-occ.active {
+  border-color: var(--ui-3);
+  background: var(--bg-2);
+}
+
+/* inline page boundary: hairline tick + tiny page number */
+.page-sep {
+  display: inline-block;
+  margin: 0 0.55em;
+  padding-inline-start: 0.4em;
+  border-inline-start: 1px solid var(--ui-2);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--tx-3);
+  user-select: none;
+}
+.page-sep.dim {
+  opacity: 0.55;
+}
+
+.page-pip-input {
+  width: 34px;
+  padding: 0;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--tx);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ——— Locate flash: brief golden tint on the ayah just jumped to ———
+   Opaque mix animating back to var(--bg) (not opacity) so the 0.9em join
+   overlaps never double-darken; z-index -2 keeps it under highlight pills. */
+.mushaf .w.fl::after,
+.mushaf .marker.fl::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: 6px;
+  background: var(--bg);
+  animation: locate-flash 1.7s ease-out 0.25s both;
+}
+.mushaf .w.fl.fl-j::after {
+  inset-inline-end: -0.9em;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.mushaf .fl.fl-j-prev::after {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+@keyframes locate-flash {
+  from {
+    background: color-mix(in srgb, var(--ye) 26%, var(--bg));
+  }
+  to {
+    background: var(--bg);
+  }
+}
+
+/* ——— Mutashābihāt: ambient underlines + anchored popover ——— */
+/* one wrapper per contiguous twin-phrase run — a single continuous dotted line */
+.mushaf .mut-run {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: color-mix(in srgb, var(--pu) 60%, transparent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.32em;
+}
+/* every word in the run dimmed → grey the line (runs straddling the band stay purple) */
+.mushaf .mut-run:not(:has(.w:not(.dim))) {
+  text-decoration-color: var(--ui-2);
+}
+.mut-star {
+  color: var(--pu);
+}
+.mut-pop {
+  position: absolute;
+  z-index: 35;
+  width: min(400px, 92vw);
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--ui-2);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  transform: translateX(-50%);
+}
+.mut-pop.above {
+  transform: translate(-50%, -100%);
+}
+
+/* ——— shared drawer (Marks) ——— */
+.mut-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: min(420px, 92vw);
+  background: var(--bg);
+  border-inline-start: 1px solid var(--ui-2);
+  z-index: 40;
+  overflow-y: auto;
+  padding: 12px 20px 40px;
+}
+.mut-head {
+  position: sticky;
+  top: -12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg);
+  padding-block: 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--ui);
+}
+.mut-title {
+  color: var(--pu);
+  font-size: 14px;
+  font-weight: 600;
+}
+.mut-note {
+  color: var(--tx-2);
+  font-size: 14px;
+  padding-block: 14px;
+}
+.mut-note.err {
+  color: var(--re);
+}
+.mut-phrase {
+  padding-block: 14px;
+}
+.mut-phrase + .mut-phrase {
+  border-top: 1px solid var(--ui);
+}
+.mut-phrase-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 22px;
+  line-height: 2;
+  color: color-mix(in srgb, var(--pu) 65%, var(--tx));
+}
+.mut-caption {
+  color: var(--tx-3);
+  font-size: 12px;
+  margin-block: 2px 10px;
+}
+.mut-occ {
+  display: block;
+  width: 100%;
+  text-align: start;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.mut-occ:hover {
+  border-color: var(--pu);
+  background: var(--bg-2);
+}
+.mut-occ-ref {
+  font-size: 12px;
+  color: var(--tx-2);
+  margin-bottom: 4px;
+}
+.mut-occ-ar {
+  font-family: 'KFGQPC Local', 'Amiri Quran', serif;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--tx-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mut-seg {
+  color: var(--pu);
+}
