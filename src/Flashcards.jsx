@@ -79,12 +79,42 @@ export default function Flashcards({ goHome, openReader }) {
   const answer = (g) => {
     getReciter().stop()
     const updated = graded(card, g)
+    save('revlog', [...load('revlog', []), { id: card.id, grade: g, ts: Date.now() }])
     setCards((prev) => {
       const next = prev.map((c) => (c.id === card.id ? updated : c))
       save('cards', next)
       return next
     })
   }
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const t = e.target
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
+      if (!card) return
+      if (e.key === 'Escape') {
+        if (e.defaultPrevented) return
+        if (revealed) {
+          e.preventDefault()
+          setRevealed(false)
+        }
+        return
+      }
+      if (e.key === ' ') {
+        e.preventDefault()
+        if (revealed) answer(2)
+        else setRevealed(true)
+        return
+      }
+      if (revealed && e.key >= '1' && e.key <= '4') {
+        e.preventDefault()
+        answer(Number(e.key) - 1)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [revealed, card?.id])
 
   const listening = rec.status === 'listening'
 
@@ -158,7 +188,7 @@ export default function Flashcards({ goHome, openReader }) {
                       : 'Loading…'
                     : '🎙 Recite answer'}
               </button>
-              <button className="ghost" onClick={() => setRevealed(true)}>
+              <button className="ghost" title="space" onClick={() => setRevealed(true)}>
                 Show answer
               </button>
               <button className="ghost" onClick={() => openReader(card.surah, card.ayah)}>
@@ -168,7 +198,7 @@ export default function Flashcards({ goHome, openReader }) {
           ) : (
             <div className="card-actions">
               {GRADES.map(({ g, label, cls }) => (
-                <button key={g} className={'grade ' + cls} onClick={() => answer(g)}>
+                <button key={g} className={'grade ' + cls} title={String(g + 1)} onClick={() => answer(g)}>
                   {label}
                   <span className="grade-ivl">{fmtInterval(graded(card, g).interval)}</span>
                 </button>
